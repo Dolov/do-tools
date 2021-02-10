@@ -62,7 +62,7 @@ const getCurrentBranch = (): string | null => {
   return null
 }
 
-export {
+export default {
   getStageStatus,
   gitWorkspaceStatus,
   getCurrentBranch,
