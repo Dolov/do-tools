@@ -7,9 +7,9 @@ const { spawnSync } = require('child_process');
 /**
  * 检查工作区状态
  */
-const gitWorkspaceStatus = (): string | null => {
+export const gitWorkspaceStatus = (): string | null => {
   /** 检查工作区状态 */
-const workspaceStatus = spawnSync('git', ['status', '--porcelain'])
+  const workspaceStatus = spawnSync('git', ['status', '--porcelain'])
 
   /** 工作区存在数据 */
   if (workspaceStatus.stdout.length) {
@@ -21,7 +21,7 @@ const workspaceStatus = spawnSync('git', ['status', '--porcelain'])
 /**
  * 检查暂存区状态
  */
-const getStageStatus = (): string | null => {
+export const getStageStatus = (): string | null => {
   const stageStatus = spawnSync('git', ['cherry', '-v'])
   if (stageStatus.stdout.length) {
     return stageStatus.stdout.toString()
@@ -33,7 +33,7 @@ const getStageStatus = (): string | null => {
 /**
  * 获取最后的提交信息
  */
-const getLastCommitMessage = (): {
+export const getLastCommitMessage = (): {
   date: string;
   author: string;
   commit: string;
@@ -54,7 +54,7 @@ const getLastCommitMessage = (): {
 /**
  * 获取当前分支
  */
-const getCurrentBranch = (): string | null => {
+export const getCurrentBranch = (): string | null => {
   const branch = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
   if (branch.stdout.length) {
     return branch.stdout.toString()
@@ -62,9 +62,3 @@ const getCurrentBranch = (): string | null => {
   return null
 }
 
-export default {
-  getStageStatus,
-  gitWorkspaceStatus,
-  getCurrentBranch,
-  getLastCommitMessage,
-}
