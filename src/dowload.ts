@@ -4,26 +4,28 @@ import https from 'https'
 import signale, { Signale } from 'signale'
 
 interface OptionProps {
-  init?(): void
+  beforeStart?(): void
+  onStart?(size: number): void
   onError?(error: Error): void
   onSuccess?(): void
-  onProgress?(val: string): void
+  onProgress?(rate: string, totalSize: number, downloadedSize: number): void
 }
 
 export const download = (url: string, savePath: string, options?: OptionProps) => {
-  const { init, onSuccess, onProgress, onError } = options || {}
+  const { beforeStart, onStart, onSuccess, onProgress, onError } = options || {}
   return new Promise(resolve => {
-    init && init()
+    beforeStart && beforeStart()
     https.get(url, response => {
       const fileStream = fs.createWriteStream(savePath);
       response.pipe(fileStream);
-      let downloadedBytes = 0;
+      let downloadedSize = 0;
       const totalSize = parseInt(response.headers['content-length']!);
+      onStart && onStart(totalSize)
       response.on('data', chunk => {
-        downloadedBytes += chunk.length;
-        const progress = downloadedBytes / totalSize;
-        const val = `${(progress * 100).toFixed(2)}%`
-        onProgress && onProgress(val)
+        downloadedSize += chunk.length;
+        const progress = downloadedSize / totalSize;
+        const rate = `${(progress * 100).toFixed(2)}%`
+        onProgress && onProgress(rate, totalSize, downloadedSize)
       });
     
       response.on('end', () => {
@@ -43,19 +45,24 @@ export const downloadWithLog = async (url: string, savePath: string, options?: {
   title?: string
   successSuffix?: string
 }) => {
-  const { title = url, successSuffix } = options || {}
   let startTime = new Date().getTime()
+  const { title = url, successSuffix } = options || {}
   const interactive = new Signale({ interactive: true, scope: title });
   return await download(url, savePath, {
-    init() {
+    beforeStart() {
       startTime = new Date().getTime()
       signale.await({
         prefix: `[${title}]`,
         message: `准备下载`
       })
     },
-    onProgress(progress) {
-      interactive.watch(progress)
+    onStart(size: number) {
+      
+    },
+    onProgress(progress, totalSize, downloadedSize) {
+      const totalSizeM = (totalSize / 1024 / 1024).toFixed(3)
+      const downloadedSizeM = (downloadedSize / 1024 / 1024).toFixed(3)
+      interactive.watch(`${downloadedSizeM} / ${totalSizeM} 【${progress}】`)
     },
     onSuccess() {
       const endTime = new Date().getTime()
