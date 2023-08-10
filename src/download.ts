@@ -59,6 +59,11 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
     },
     onStart(size: number) {
       onStart && onStart(size)
+      const sizeM = (size / 1024 / 1024).toFixed(3)
+      signale.await({
+        prefix: `[${title}]`,
+        message: `开始下载 ${sizeM}M`
+      })
     },
     onProgress(progress, totalSize, downloadedSize) {
       onProgress && onProgress(progress, totalSize, downloadedSize)
@@ -80,4 +85,27 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
       signale.error(error)
     }
   })
+}
+
+/** 爬取 html 数据 */
+export const getHtml = (url: string): Promise<string> => {
+	return new Promise(resolve => {
+		https.get(url, res => {
+			let html = '';
+			/** 重定向后重新获取 html */
+			if (res.statusCode === 301 || res.statusCode === 302) {
+				const redirectUrl = res.headers.location || "";
+				getHtml(redirectUrl).then(resolve)
+				return
+			}
+			// 有数据产生的时候 拼接
+			res.on('data', chunk => {
+				html += chunk;
+			})
+			// 拼接完成
+			res.on('end', function () {
+				resolve(html)
+			})
+		});
+	})
 }
