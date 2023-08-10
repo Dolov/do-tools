@@ -1,13 +1,16 @@
-/*
- * @Author: songyan.shi 
- * @Date: 2021-05-07 16:00:16 
- * @Last Modified by: songyan.shi
- * @Last Modified time: 2021-05-07 16:02:29
- */
 
 /**
- * @fileoverview 收集常用的正则
+ * @fileoverview 常用的正则
  */
 
-/** 过滤接口 */
-export const getApis = /\/api\/([a-z|0-9|A-Z|\/|-]*)/g;
+/** 过滤 /api/ 接口 */
+const api = /\/api\/([a-z|0-9|A-Z|\/|-]*)/g;
+
+/** 数字结尾 */
+const endWithNumber = /\d+$/
+
+
+export default {
+	api,
+	endWithNumber,
+}
