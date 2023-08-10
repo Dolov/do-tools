@@ -41,15 +41,16 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
   })
 }
 
-export const downloadWithLog = async (url: string, savePath: string, options?: {
+export const downloadWithLog = async (url: string, savePath: string, options?: OptionProps & {
   title?: string
   successSuffix?: string
 }) => {
   let startTime = new Date().getTime()
-  const { title = url, successSuffix } = options || {}
+  const { title = url, successSuffix, beforeStart, onStart, onProgress, onError, onSuccess } = options || {}
   const interactive = new Signale({ interactive: true, scope: title });
   return await download(url, savePath, {
     beforeStart() {
+      beforeStart && beforeStart()
       startTime = new Date().getTime()
       signale.await({
         prefix: `[${title}]`,
@@ -57,14 +58,16 @@ export const downloadWithLog = async (url: string, savePath: string, options?: {
       })
     },
     onStart(size: number) {
-      
+      onStart && onStart(size)
     },
     onProgress(progress, totalSize, downloadedSize) {
+      onProgress && onProgress(progress, totalSize, downloadedSize)
       const totalSizeM = (totalSize / 1024 / 1024).toFixed(3)
       const downloadedSizeM = (downloadedSize / 1024 / 1024).toFixed(3)
-      interactive.watch(`${downloadedSizeM} / ${totalSizeM} 【${progress}】`)
+      interactive.watch(`${downloadedSizeM}M / ${totalSizeM}M 【${progress}】`)
     },
     onSuccess() {
+      onSuccess && onSuccess()
       const endTime = new Date().getTime()
       const time = (endTime - startTime) / 1000
       signale.success({
@@ -73,6 +76,7 @@ export const downloadWithLog = async (url: string, savePath: string, options?: {
       })
     },
     onError(error) {
+      onError && onError(error)
       signale.error(error)
     }
   })
