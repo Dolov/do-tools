@@ -2,7 +2,6 @@
 import fs from 'fs'
 import https from 'https'
 import signale, { Signale } from 'signale'
-import { debounce } from 'lodash'
 
 interface OptionProps {
   beforeStart?(): void
@@ -44,16 +43,12 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
 
 export const downloadWithLog = async (url: string, savePath: string, options?: OptionProps & {
   title?: string
-  debounceTime?: number
+  throttleTime?: number
   successSuffix?: string
 }) => {
   let startTime = new Date().getTime()
-  const { title = url, successSuffix, debounceTime = 1000, beforeStart, onStart, onProgress, onError, onSuccess } = options || {}
+  const { title = url, successSuffix, throttleTime = 1000, beforeStart, onStart, onProgress, onError, onSuccess } = options || {}
   const interactive = new Signale({ interactive: true, scope: title });
-
-  const progressLog = debounce((message: string) => {
-    interactive.watch(message)
-  }, debounceTime)
 
   return await download(url, savePath, {
     beforeStart() {
@@ -75,7 +70,7 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
       const totalSizeM = (totalSize / 1024 / 1024).toFixed(3)
       const downloadedSizeM = (downloadedSize / 1024 / 1024).toFixed(3)
       const message = `${downloadedSizeM}M / ${totalSizeM}M 【${progress} / ${time}s】`
-      progressLog(message)
+      interactive.watch(message)
     },
     onSuccess() {
       onSuccess && onSuccess()
