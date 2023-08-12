@@ -43,11 +43,10 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
 
 export const downloadWithLog = async (url: string, savePath: string, options?: OptionProps & {
   title?: string
-  throttleTime?: number
   successSuffix?: string
 }) => {
   let startTime = new Date().getTime()
-  const { title = url, successSuffix, throttleTime = 1000, beforeStart, onStart, onProgress, onError, onSuccess } = options || {}
+  const { title = url, successSuffix, beforeStart, onStart, onProgress, onError, onSuccess } = options || {}
   const interactive = new Signale({ interactive: true, scope: title });
 
   return await download(url, savePath, {
@@ -58,7 +57,7 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
     onStart(size: number) {
       onStart && onStart(size)
       const sizeM = (size / 1024 / 1024).toFixed(3)
-      signale.await({
+      signale.start({
         prefix: `[${title}]`,
         message: `开始下载 ${sizeM}M`
       })
