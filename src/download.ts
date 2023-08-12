@@ -7,12 +7,13 @@ interface OptionProps {
   beforeStart?(): void
   onStart?(size: number): void
   onError?(error: Error): void
-  onSuccess?(): void
+  onSuccess?(rate: string): void
   onProgress?(rate: string, totalSize: number, downloadedSize: number): void
+  allow99?: boolean
 }
 
 export const download = (url: string, savePath: string, options?: OptionProps) => {
-  const { beforeStart, onStart, onSuccess, onProgress, onError } = options || {}
+  const { beforeStart, onStart, onSuccess, onProgress, onError, allow99 = true } = options || {}
   return new Promise(resolve => {
     beforeStart && beforeStart()
     https.get(url, response => {
@@ -21,19 +22,42 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
       let downloadedSize = 0;
       const totalSize = parseInt(response.headers['content-length']!);
       onStart && onStart(totalSize)
+
+      let rate = ""
       response.on('data', chunk => {
         downloadedSize += chunk.length;
         const progress = downloadedSize / totalSize;
-        const rate = `${(progress * 100).toFixed(2)}%`
+        rate = (progress * 100).toFixed(2)
         onProgress && onProgress(rate, totalSize, downloadedSize)
       });
+
+      let lastRate = ""
+      let stopCount = 0
+      const timer = setInterval(() => {
+        if (!allow99) return
+        if (lastRate !== rate) {
+          lastRate = rate
+          stopCount = 0
+          return
+        }
+        if (Number(rate) > 99) {
+          stopCount += 1
+        }
+        if (stopCount > 5) {
+          clearInterval(timer)
+          onSuccess && onSuccess(rate)
+          resolve(true)
+        }
+      }, 5 * 1000)
     
       response.on('end', () => {
-        onSuccess && onSuccess()
+        clearInterval(timer)
+        onSuccess && onSuccess(rate)
         resolve(true)
       });
 
       response.on('error', err => {
+        clearInterval(timer)
         onError && onError(err)
         resolve(false)
       });
@@ -62,21 +86,21 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
         message: `开始下载 ${sizeM}M`
       })
     },
-    onProgress(progress, totalSize, downloadedSize) {
-      onProgress && onProgress(progress, totalSize, downloadedSize)
+    onProgress(rate, totalSize, downloadedSize) {
+      onProgress && onProgress(rate, totalSize, downloadedSize)
       const endTime = new Date().getTime()
       const time = (endTime - startTime) / 1000
       const totalSizeM = (totalSize / 1024 / 1024).toFixed(3)
       const downloadedSizeM = (downloadedSize / 1024 / 1024).toFixed(3)
-      const message = `${downloadedSizeM}M / ${totalSizeM}M 【${progress} / ${time}s】`
+      const message = `${downloadedSizeM}M / ${totalSizeM}M 【${rate}% / ${time}s】`
       interactive.watch(message)
     },
-    onSuccess() {
-      onSuccess && onSuccess()
+    onSuccess(rate) {
+      onSuccess && onSuccess(rate)
       const endTime = new Date().getTime()
       const time = (endTime - startTime) / 1000
       signale.success({
-        message: `${title} ${time}s`,
+        message: `${title} ${rate}% ${time}s`,
         suffix: successSuffix
       })
     },
