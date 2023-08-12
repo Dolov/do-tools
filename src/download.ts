@@ -9,11 +9,11 @@ interface OptionProps {
   onError?(error: Error): void
   onSuccess?(rate: string): void
   onProgress?(rate: string, totalSize: number, downloadedSize: number): void
-  allow99?: boolean
+  allowSize?: number
 }
 
 export const download = (url: string, savePath: string, options?: OptionProps) => {
-  const { beforeStart, onStart, onSuccess, onProgress, onError, allow99 = true } = options || {}
+  const { beforeStart, onStart, onSuccess, onProgress, onError, allowSize = 100 } = options || {}
   return new Promise(resolve => {
     beforeStart && beforeStart()
     https.get(url, response => {
@@ -34,13 +34,13 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
       let lastRate = ""
       let stopCount = 0
       const timer = setInterval(() => {
-        if (!allow99) return
+        if (allowSize === 100) return
         if (lastRate !== rate) {
           lastRate = rate
           stopCount = 0
           return
         }
-        if (Number(rate) > 99) {
+        if (Number(rate) > allowSize) {
           stopCount += 1
         }
         if (stopCount > 5) {
@@ -66,14 +66,16 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
 }
 
 export const downloadWithLog = async (url: string, savePath: string, options?: OptionProps & {
+  rate?: () => string | string
   title?: string
   successSuffix?: string
 }) => {
   let startTime = new Date().getTime()
-  const { title = url, successSuffix, beforeStart, onStart, onProgress, onError, onSuccess } = options || {}
+  const { rate: downloadRate, title = url, successSuffix, beforeStart, onStart, onProgress, onError, onSuccess } = options || {}
   const interactive = new Signale({ interactive: true, scope: title });
 
   return await download(url, savePath, {
+
     beforeStart() {
       beforeStart && beforeStart()
       startTime = new Date().getTime()
@@ -99,9 +101,10 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
       onSuccess && onSuccess(rate)
       const endTime = new Date().getTime()
       const time = (endTime - startTime) / 1000
+      const suffix = typeof downloadRate === "function" ? downloadRate(): downloadRate
       signale.success({
-        message: `${title} ${rate}% ${time}s`,
-        suffix: successSuffix
+        suffix,
+        message: `${title} 【${rate}% / ${time}s】`,
       })
     },
     onError(error) {
