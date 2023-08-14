@@ -75,7 +75,7 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
   const interactive = new Signale({ interactive: true, scope: title });
 
   return await download(url, savePath, {
-
+    ...options,
     beforeStart() {
       beforeStart && beforeStart()
       startTime = new Date().getTime()
