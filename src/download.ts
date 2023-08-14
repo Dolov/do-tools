@@ -84,8 +84,8 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
       onStart && onStart(size)
       const sizeM = (size / 1024 / 1024).toFixed(3)
       signale.start({
-        prefix: `[${title}]`,
-        message: `开始下载 ${sizeM}M`
+        message: "开始下载",
+        suffix: `${title} - ${sizeM}M`
       })
     },
     onProgress(rate, totalSize, downloadedSize) {
@@ -99,12 +99,10 @@ export const downloadWithLog = async (url: string, savePath: string, options?: O
     },
     onSuccess(rate) {
       onSuccess && onSuccess(rate)
-      const endTime = new Date().getTime()
-      const time = (endTime - startTime) / 1000
       const suffix = typeof downloadRate === "function" ? downloadRate(): downloadRate
       signale.success({
         suffix,
-        message: `${title} 【${rate}% / ${time}s】`,
+        message: title,
       })
     },
     onError(error) {
