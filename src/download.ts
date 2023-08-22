@@ -34,21 +34,22 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
       let lastRate = ""
       let stopCount = 0
       const timer = setInterval(() => {
-        if (allowSize === 100) return
         if (lastRate !== rate) {
           lastRate = rate
           stopCount = 0
           return
         }
-        if (Number(rate) > allowSize) {
-          stopCount += 1
-        }
-        if (stopCount > 5) {
-          clearInterval(timer)
+        if (stopCount < 30) return
+        clearInterval(timer)
+
+        if (Number(rate) >= allowSize) {
           onSuccess && onSuccess(rate)
           resolve(true)
         }
-      }, 5 * 1000)
+
+        onError && onError(new Error("长时间不动，可能是网络异常"))
+        resolve(false)
+      }, 1000)
     
       response.on('end', () => {
         clearInterval(timer)
