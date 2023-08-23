@@ -5,5 +5,5 @@ export * as Reg from './reg'
 
 export { download, downloadWithLog, getHtml } from './download'
 export { runTasksWithConcurrency } from './runTasksWithConcurrency'
-export { getFilesAndFolders, increName } from './files'
+export { getFilesAndFolders, increName, getFileStatTree } from './files'
 export { generateRandomId, filterExported } from './utils'

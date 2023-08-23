@@ -49,3 +49,42 @@ export const increName = (name: string, names: string[]): string => {
   }
   return increName(`${name}2`, names)
 }
+
+interface FileStatTreeProps {
+  size: number,
+  name: string,
+  path: string,
+  birthtime: Date,
+  leaf: boolean,
+  children?: FileStatTreeProps[]
+}
+
+/**
+ * 获取指定文件夹下的文件状态树
+ * @param directory 文件夹路径
+ * @returns 文件状态树
+ */
+export const getFileStatTree = (directory: string): FileStatTreeProps[] => {
+  const files = fs.readdirSync(directory)
+  
+  return files.reduce((currentValue: FileStatTreeProps[], currentItem) => {
+    const filePath = `${directory}/${currentItem}`
+    const stat = fs.statSync(filePath)
+    const isFile = stat.isFile()
+    const { size, birthtime } = stat
+    const fileStat: FileStatTreeProps = {
+      size,
+      birthtime,
+      name: currentItem,
+      path: filePath,
+      leaf: isFile,
+    }
+    
+    if (!isFile) {
+      fileStat.children = getFileStatTree(filePath)
+    }
+
+    currentValue.push(fileStat)
+    return currentValue
+  }, [])
+}
