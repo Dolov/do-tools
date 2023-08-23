@@ -1,6 +1,6 @@
 {
   "name": "do-tools",
-  "version": "1.6.10",
+  "version": "1.6.11",
   "description": "常用工具函数",
   "main": "lib/index.js",
   "files": [
