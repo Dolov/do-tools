@@ -39,12 +39,14 @@ export const download = (url: string, savePath: string, options?: OptionProps) =
           stopCount = 0
           return
         }
+        stopCount += 1
         if (stopCount < 30) return
         clearInterval(timer)
 
         if (Number(rate) >= allowSize) {
           onSuccess && onSuccess(rate)
           resolve(true)
+          return
         }
 
         onError && onError(new Error("长时间不动，可能是网络异常"))
