@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/Dolov/do-tools#readme",
   "dependencies": {
+    "axios": "^1.6.0",
     "lodash": "^4.17.21",
     "signale": "^1.4.0"
   },

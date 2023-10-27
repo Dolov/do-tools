@@ -63,7 +63,7 @@ const getTheRepos = (orgName) => {
 
 /** 获取多个组织下全部的仓库 */
 const getAllRepos = async orgs => {
-	const orgNames = orgs.map(item => item.login).filter(name => !ignoreOrgs.includes(name))
+	const orgNames = orgs.map(item => item.login).filter(name => !ignoreOrgs.includes(name) && name !== theNewOrg)
 	const allRepos = []
 	for (const name of orgNames) {
 		const repos = await getTheRepos(name)
