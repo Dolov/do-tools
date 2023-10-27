@@ -194,12 +194,12 @@ const createTempDir = () => {
 }
 
 const init = async () => {
-	// const orgs = await getOrgs()
-	// const reposList = await getAllRepos(orgs)
-	// createTempDir()
-	// cloneReposToLocal(reposList)
-	// await createTheNewOrg()
-	// await createReposList(reposList)
+	const orgs = await getOrgs()
+	const reposList = await getAllRepos(orgs)
+	createTempDir()
+	cloneReposToLocal(reposList)
+	await createTheNewOrg()
+	await createReposList(reposList)
 	resetRemoteOrigin()
 }
 
