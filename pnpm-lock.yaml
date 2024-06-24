@@ -25,6 +25,9 @@ devDependencies:
   '@types/signale':
     specifier: ^1.4.4
     version: 1.4.4
+  prettier:
+    specifier: ^3.3.2
+    version: 3.3.2
   typescript:
     specifier: ^4.1.4
     version: 4.1.4
@@ -236,6 +239,12 @@ packages:
       find-up: 2.1.0
       load-json-file: 4.0.0
     dev: false
+
+  /prettier@3.3.2:
+    resolution: {integrity: sha512-rAVeHYMcv8ATV5d508CFdn+8/pHPpXeIid1DdrPwXnaAdH7cqjVbpJaT5eq4yRAFU/lsbwYwSF/n5iNrdJHPQA==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
 
   /proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
